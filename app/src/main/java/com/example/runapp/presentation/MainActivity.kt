@@ -1,23 +1,34 @@
 package com.example.runapp.presentation
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.findNavController
+import androidx.navigation.ui.setupWithNavController
 import com.example.runapp.R
-import com.example.runapp.data.RunDao
+import com.example.runapp.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    @Inject
-    lateinit var dao : RunDao
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        Log.d("Acecard", dao.hashCode().toString())
+        setSupportActionBar(binding.toolbar)
+        val navHostFragment = findNavController(R.id.navHostFragment)
+        binding.bottomNavigationView.setupWithNavController(navHostFragment)
+
+        navHostFragment.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.settingsFragment, R.id.runFragment, R.id.statisticsFragment ->
+                    binding.bottomNavigationView.visibility = View.VISIBLE
+                else -> binding.bottomNavigationView.visibility = View.GONE
+            }
+        }
     }
 }
