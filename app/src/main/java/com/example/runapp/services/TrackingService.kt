@@ -18,11 +18,16 @@ import com.example.runapp.other.Constants.ACTION_STOP_SERVICE
 import com.example.runapp.other.Constants.NOTIFICATION_CHANNEL_ID
 import com.example.runapp.other.Constants.NOTIFICATION_ID
 import com.example.runapp.presentation.MainActivity
+import com.google.android.gms.maps.model.LatLng
 import timber.log.Timber
+
+typealias Polyline = MutableList<LatLng>
+typealias Polylines = MutableList<Polyline>
+
 
 class TrackingService : LifecycleService() {
 
-    var isFirstRun = true
+    private var isFirstRun = true
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.let {
@@ -70,7 +75,7 @@ class TrackingService : LifecycleService() {
         ).also {
             it.action = ACTION_SHOW_TRACKING_FRAGMENT
         },
-        FLAG_UPDATE_CURRENT
+        PendingIntent.FLAG_IMMUTABLE or FLAG_UPDATE_CURRENT
     )
 
     private fun createNotificationChannel(notificationManager: NotificationManager) {

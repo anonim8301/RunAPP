@@ -1,55 +1,41 @@
 package com.example.runapp.presentation.fragments
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.NotificationManager.IMPORTANCE_LOW
-import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.example.runapp.R
 import com.example.runapp.databinding.FragmentTrackingBinding
 import com.example.runapp.other.Constants.ACTION_START_OR_RESUME_SERVICE
-import com.example.runapp.other.Constants.NOTIFICATION_CHANNEL_ID
-import com.example.runapp.other.Constants.NOTIFICATION_CHANNEL_NAME
 import com.example.runapp.services.TrackingService
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class TrackingFragment : Fragment(R.layout.fragment_tracking) {
+class TrackingFragment : Fragment(R.layout.fragment_tracking), OnMapReadyCallback {
+
+    private lateinit var mMap: GoogleMap
 
     private lateinit var binding: FragmentTrackingBinding
-
-    private var map: GoogleMap? = null
-
-    override fun onPause() {
-        super.onPause()
-        binding.mapView.onResume()
-    }
-
-    override fun onDestroy() {
-        binding.mapView.onDestroy()
-        super.onDestroy()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        binding.mapView.onLowMemory()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
+
         binding = FragmentTrackingBinding.inflate(inflater, container, false)
-        binding.mapView.onCreate(savedInstanceState)
+
+        val mapFragment = childFragmentManager
+            .findFragmentById(R.id.trackingFragmentForMap) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+
         return binding.root
     }
 
@@ -58,10 +44,6 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
 
         binding.btnToggleRun.setOnClickListener {
             sendCommandToService(ACTION_START_OR_RESUME_SERVICE)
-        }
-
-        binding.mapView.getMapAsync {
-            map = it
         }
     }
 
@@ -72,4 +54,12 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
         }
     }
 
+    override fun onMapReady(googleMap: GoogleMap) {
+        mMap = googleMap
+
+        // Add a marker in Sydney and move the camera
+        val sydney = LatLng(-34.0, 151.0)
+        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+    }
 }
